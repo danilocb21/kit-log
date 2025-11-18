@@ -1,0 +1,205 @@
+instances/a280.tsp
+86.2851 2579
+
+instances/ali535.tsp
+1637.93 202398
+
+instances/att48.tsp
+0.232617 10628
+
+instances/att532.tsp
+1565.07 27727.3
+
+instances/bayg29.tsp
+0.034471 1610
+
+instances/bays29.tsp
+0.0369625 2020
+
+instances/berlin52.tsp
+0.275787 7542
+
+instances/bier127.tsp
+9.42764 118282
+
+instances/brazil58.tsp
+0.357589 25395
+
+instances/brg180.tsp
+10.3345 1950
+
+instances/burma14.tsp
+0.00285696 3323
+
+instances/ch130.tsp
+10.5684 6110
+
+instances/ch150.tsp
+8.2764 6528
+
+instances/d198.tsp
+27.4157 15780
+
+instances/d493.tsp
+1061.54 35039.3
+
+instances/dantzig42.tsp
+0.12432 699
+
+instances/eil101.tsp
+3.53387 629
+
+instances/eil51.tsp
+0.29534 426
+
+instances/eil76.tsp
+1.25302 538
+
+instances/fl417.tsp
+357.718 11861
+
+instances/fri26.tsp
+0.0243528 937
+
+instances/gil262.tsp
+92.1846 2378.2
+
+instances/gr120.tsp
+7.33398 6942
+
+instances/gr137.tsp
+8.67536 69853
+
+instances/gr17.tsp
+0.00607125 2085
+
+instances/gr202.tsp
+32.9747 40160.2
+
+instances/gr21.tsp
+0.0105914 2707
+
+instances/gr229.tsp
+53.377 134611
+
+instances/gr24.tsp
+0.0191235 1272
+
+instances/gr431.tsp
+701.834 171570
+
+instances/gr48.tsp
+0.227448 5046
+
+instances/gr96.tsp
+2.55335 55209
+
+instances/hk48.tsp
+0.236243 11461
+
+instances/kroA100.tsp
+2.89786 21282
+
+instances/kroA150.tsp
+9.63907 26524
+
+instances/kroA200.tsp
+31.4144 29368
+
+instances/kroB100.tsp
+2.95337 22141
+
+instances/kroB150.tsp
+9.65975 26130
+
+instances/kroB200.tsp
+36.0964 29438.3
+
+instances/kroC100.tsp
+2.76994 20749
+
+instances/kroD100.tsp
+3.14914 21294
+
+instances/kroE100.tsp
+3.21603 22068
+
+instances/lin105.tsp
+3.22889 14379
+
+instances/lin318.tsp
+185.976 42049.2
+
+instances/linhp318.tsp
+188.194 42029
+
+instances/pcb442.tsp
+591.273 50861
+
+instances/pr107.tsp
+3.82337 44303
+
+instances/pr124.tsp
+5.2312 59030
+
+instances/pr136.tsp
+11.0385 96772
+
+instances/pr144.tsp
+8.78909 58537
+
+instances/pr152.tsp
+7.25954 73682
+
+instances/pr226.tsp
+39.2005 80369
+
+instances/pr264.tsp
+60.3557 49135
+
+instances/pr299.tsp
+125.468 48191
+
+instances/pr76.tsp
+1.04174 108159
+
+instances/rat195.tsp
+25.1168 2323.7
+
+instances/rat99.tsp
+3.22753 1211
+
+instances/rd100.tsp
+3.24052 7910
+
+instances/rd400.tsp
+519.512 15295.4
+
+instances/si175.tsp
+14.2274 21407
+
+instances/si535.tsp
+846.433 48457.7
+
+instances/st70.tsp
+0.81962 675
+
+instances/swiss42.tsp
+0.11847 1273
+
+instances/ts225.tsp
+24.8314 126643
+
+instances/tsp225.tsp
+43.3559 3916
+
+instances/u159.tsp
+8.30625 42080
+
+instances/ulysses16.tsp
+0.00496979 6859
+
+instances/ulysses22.tsp
+0.0140076 7013
+
+-

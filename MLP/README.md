@@ -1,7 +1,8 @@
 ## Minimum Latency Problem
 
 #### My implementation of the Minimum Latency Problem for the Kit-LOG process.
-- [] Benchmark results
+
+- [ ] Benchmark results
 
 #### Usage:
 

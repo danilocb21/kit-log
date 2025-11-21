@@ -30,5 +30,5 @@ meson compile -C <build_directory>
 Run the executable:
 
 ```
-./<build_directory>/mlp ./data/instances/<instance>
+./<build_directory>/src/mlp ./data/instances/<instance>
 ```

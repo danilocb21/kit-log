@@ -19,7 +19,7 @@ public:
 
     // Construction
 
-    Solution rand_cheapest_insertion(double alpha);
+    Solution rand_cheapest_insertion(const double alpha);
 
     // Local Search
 
@@ -37,7 +37,7 @@ public:
 
     // Metaheuristics
 
-    Solution GILS_RNVD(size_t max_iterations, size_t max_ils_iterations, double alpha);
+    Solution GILS_RNVD(const size_t max_iterations, const size_t max_ils_iterations, const double alpha);
 
 
     MLP(Data &instance);

@@ -4,6 +4,10 @@ sources = files(
   'solution.cpp',
   'MLP.cpp',
   'GILS.cpp',
+  'RNVD.cpp',
+  'neighborhood.cpp',
+  'construction.cpp',
+  'perturbation.cpp',
 )
 
 incdir = include_directories('../include')

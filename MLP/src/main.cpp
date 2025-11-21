@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     MLP mlp = MLP(data);
 
     size_t max_iterations = 10;
-    size_t max_ils_iterations = min(mlp.dist_matrix.size(), static_cast<size_t>(100));
+    size_t max_ils_iterations = static_cast<size_t>(min(data.getDimension(), 100));
     double alpha = 0.1; // random alpha from list
 
     Solution s = mlp.GILS_RNVD(max_iterations, max_ils_iterations, alpha);

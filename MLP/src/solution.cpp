@@ -3,7 +3,7 @@
 #include "solution.hpp"
 
 void Solution::print() const {
-    std::cout << "\nSolution\n";
+    std::cout << "Solution\n";
 
     for (int x : sequence)
         std::cout << x << ' ';

@@ -8,7 +8,7 @@ MLP::MLP(Data &instance) : m_instance(instance) {
 
     int n = m_instance.getDimension();
 
-    dist_matrix.resize(n+1, vector<double>(n+1));
+    dist_matrix.resize(n+1, std::vector<double>(n+1));
     for (int i = 1; i <= n; i++)
         for (int j = 1; j <= n; j++)
             dist_matrix[i][j] = m_instance.getDistance(i, j);

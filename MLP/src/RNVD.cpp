@@ -5,7 +5,7 @@
 #include "solution.hpp"
 
 void MLP::RVND(Solution &solution) {
-    vector<Neighborhood> NL = { Neighborhood::Swap, Neighborhood::TwoOpt, Neighborhood::Reinsertion,
+    std::vector<Neighborhood> NL = { Neighborhood::Swap, Neighborhood::TwoOpt, Neighborhood::Reinsertion,
                                 Neighborhood::OrOpt2, Neighborhood::OrOpt3 };
     bool improved = false;
 

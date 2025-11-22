@@ -14,7 +14,7 @@ private:
     std::mt19937 m_generator;
 
 public:
-    vector<vector<double>> dist_matrix;
+    std::vector<vector<double>> dist_matrix;
     enum class Neighborhood : uint8_t { Swap, TwoOpt, Reinsertion, OrOpt2, OrOpt3 };
 
     // Construction

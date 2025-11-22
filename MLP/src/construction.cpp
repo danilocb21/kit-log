@@ -27,7 +27,7 @@ Solution MLP::rand_cheapest_insertion(const double alpha) {
         CL.insert(i);
     
     while (!CL.empty()) {
-        vector<InsertionInfo> insertion_costs;
+        std::vector<InsertionInfo> insertion_costs;
         insertion_costs.reserve((CL.size()));
 
         int r = solution.sequence.back();

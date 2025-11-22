@@ -39,17 +39,18 @@ Solution MLP::rand_cheapest_insertion(const double alpha) {
 
         sort(insertion_costs.begin(), insertion_costs.end());
 
-        std::uniform_int_distribution<> dist(0, static_cast<size_t>(alpha * static_cast<double>(insertion_costs.size() - 1)));
+        std::uniform_int_distribution<size_t> dist(0, static_cast<size_t>(alpha * static_cast<double>(insertion_costs.size() - 1)));
         size_t selected = dist(m_generator);
         
         auto &x = insertion_costs[selected];
         CL.erase(x.inserted_node);
         solution.sequence.push_back(x.inserted_node);
-        solution.cost += x.cost;
     }
-
-    solution.cost += dist_matrix[solution.sequence.back()][1];
     solution.sequence.push_back(1);
+
+    update_all_subsequences(solution);
+
+    solution.cost = subsequence_matrix[0][n].C;
 
     return solution;
 }

@@ -9,8 +9,6 @@
 #include "solution.hpp"
 
 int main(int argc, char **argv) {
-    srand(time(nullptr));
-    
     auto data = Data(argc, argv[1]);
     data.read();
 
@@ -31,7 +29,7 @@ int main(int argc, char **argv) {
 
         auto start = chrono::high_resolution_clock::now();
 
-        Solution s = mlp.GILS_RNVD(max_iterations, max_ils_iterations, alpha);
+        Solution s = mlp.GILS_RVND(max_iterations, max_ils_iterations, alpha);
 
         auto end = chrono::high_resolution_clock::now();
 

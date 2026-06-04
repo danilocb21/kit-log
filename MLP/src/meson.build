@@ -4,7 +4,7 @@ sources = files(
   'solution.cpp',
   'MLP.cpp',
   'GILS.cpp',
-  'RNVD.cpp',
+  'RVND.cpp',
   'neighborhood.cpp',
   'construction.cpp',
   'perturbation.cpp',

@@ -76,26 +76,30 @@ bool MLP::best_improvement_or_opt(Solution &solution, int block_size) {
     size_t n = solution.sequence.size();
 
     for (size_t i = 0; i < n - block_size - 1; i++) {
-        for (size_t j = 0; j < n - 1; j++) {
-            if (j >= i && j <= i + block_size) continue;
 
-            Subsequence sigma;
-            if (i < j) {
-                sigma = concatenate(subsequence_matrix[0][i], subsequence_matrix[i + block_size + 1][j]);
-                sigma = concatenate(sigma, subsequence_matrix[i + 1][i + block_size]);
-                sigma = concatenate(sigma, subsequence_matrix[j + 1][n - 1]);
-            }
-            else {
-                sigma = concatenate(subsequence_matrix[0][j], subsequence_matrix[i + 1][i + block_size]);
-                sigma = concatenate(sigma, subsequence_matrix[j + 1][i]);
-                sigma = concatenate(sigma, subsequence_matrix[i + block_size + 1][n - 1]);
-            }
+        for (size_t j = 0; j < i; j++) {
+            Subsequence sigma = concatenate(subsequence_matrix[0][j], subsequence_matrix[i + 1][i + block_size]);
+            sigma = concatenate(sigma, subsequence_matrix[j + 1][i]);
+            sigma = concatenate(sigma, subsequence_matrix[i + block_size + 1][n - 1]);
 
             if (sigma.C < best_cost) {
                 best_cost = sigma.C;
                 best_i = i;
                 best_j = j;
             }
+        }
+
+        for (size_t j = i + block_size + 1; j < n - 1; j++) {
+            Subsequence sigma = concatenate(subsequence_matrix[0][i], subsequence_matrix[i + block_size + 1][j]);
+            sigma = concatenate(sigma, subsequence_matrix[i + 1][i + block_size]);
+            sigma = concatenate(sigma, subsequence_matrix[j + 1][n - 1]);
+
+            if (sigma.C < best_cost) {
+                best_cost = sigma.C;
+                best_i = i;
+                best_j = j;
+            }
+
         }
     }
 

@@ -3,7 +3,7 @@
 #include "MLP.hpp"
 #include "solution.hpp"
 
-Solution MLP::GILS_RNVD(const size_t max_iterations, const size_t max_ils_iterations, const double alpha) {
+Solution MLP::GILS_RVND(const size_t max_iterations, const size_t max_ils_iterations, const double alpha) {
     Solution best_found;
     best_found.cost = std::numeric_limits<double>::max();
 

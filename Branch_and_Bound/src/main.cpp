@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 	else if (strategy == "BFS")
 		branching_strategy = BnB::BranchingStrategy::BFS;
 	else
-		branching_strategy = BnB::BranchingStrategy::MLB;
+		branching_strategy = BnB::BranchingStrategy::BBS;
 
 	
 	uint8_t runs = 10;

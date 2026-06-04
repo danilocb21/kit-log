@@ -7,10 +7,12 @@ double BnB::solve(const BranchingStrategy branching_strategy) {
     
     double upper_bound = construction(); // Initial solution    
 
-    if (branching_strategy == BranchingStrategy::MLB)
+    if (branching_strategy == BranchingStrategy::BBS)
         upper_bound = solve_pq(root, upper_bound);
+    else if (branching_strategy == BranchingStrategy::DFS)
+        upper_bound = solve_list(root, upper_bound);
     else
-        upper_bound = solve_list(root, upper_bound, branching_strategy);
+        upper_bound = solve_list2(root, upper_bound);
 
     return upper_bound;
 }
@@ -47,20 +49,12 @@ double BnB::solve_pq(Node &root, double upper_bound) {
     return upper_bound;
 }
 
-double BnB::solve_list(Node &root, double upper_bound, const BranchingStrategy branching_strategy) {
-    tree.push_back(root);
+double BnB::solve_list(Node &root, double upper_bound) {
+    tree1.push(root);
     
-    while (!tree.empty()) {
-        Node node;
-
-        if (branching_strategy == BranchingStrategy::DFS) {
-            node = tree.back();
-            tree.pop_back();
-        }
-        else {
-            node = tree.front();
-            tree.pop_front();
-        }
+    while (!tree1.empty()) {
+        Node node = tree1.top();
+        tree1.pop();
 
         if (node.lower_bound > upper_bound)
             continue;
@@ -79,7 +73,40 @@ double BnB::solve_list(Node &root, double upper_bound, const BranchingStrategy b
 
                 n.update(costs, N);
                 if (n.lower_bound <= upper_bound)
-                    tree.push_back(n);
+                    tree1.push(n);
+            }
+        }
+    }
+
+    return upper_bound;
+}
+
+
+double BnB::solve_list2(Node &root, double upper_bound) {
+    tree2.push(root);
+    
+    while (!tree2.empty()) {
+        Node node = tree2.front();
+        tree2.pop();
+
+        if (node.lower_bound > upper_bound)
+            continue;
+
+        if (node.is_feasible())
+            upper_bound = std::min(upper_bound, node.lower_bound);
+        else {
+            int chosen = node.chosen;
+            for (size_t i = 0; i < node.subtour[chosen].size() - 1; i++) {
+                Node n = node;
+
+                n.forbidden_arcs.emplace_back(
+                    node.subtour[chosen][i],
+                    node.subtour[chosen][i + 1]
+                );
+
+                n.update(costs, N);
+                if (n.lower_bound <= upper_bound)
+                    tree2.push(n);
             }
         }
     }

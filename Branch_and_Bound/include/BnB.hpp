@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <list>
+#include <stack>
 #include <queue>
 
 #include "data.h"
@@ -13,12 +13,13 @@ class BnB {
 private:
     Data m_instance;
     
-    std::list<Node> tree;
+    std::stack<Node> tree1;
+    std::queue<Node> tree2;
     
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq_tree;
 
 public:
-    enum class BranchingStrategy : uint8_t { DFS, BFS, MLB };
+    enum class BranchingStrategy : uint8_t { DFS, BFS, BBS };
     double **costs;
     int N; // grid dimension
 
@@ -27,8 +28,9 @@ public:
 
     // Branch and Bound algorithm
     double solve(const BranchingStrategy branching_strategy);
-    double solve_pq(Node &root, double upper_bound);
-    double solve_list(Node &root, double upper_bound, const BranchingStrategy branching_strategy);
+    double solve_pq(Node &root, double upper_bound); // Best Bound Search
+    double solve_list(Node &root, double upper_bound); // DFS
+    double solve_list2(Node &root, double upper_bound); // BFS
 
     BnB(Data &instance, double **cost);
 };

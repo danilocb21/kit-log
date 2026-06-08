@@ -352,12 +352,21 @@ bool bestImprovementOrOpt(Solution &s, int blockSize) {
         int vk_first = s.sequence[i+1];
         int vk_last = s.sequence[i+blockSize];
 
-        for (int j = 0; j < s.sequence.size() - 1; j++) {
-            // j >= i && j <= i + blockSize
-            if (i == j) {
-                j += blockSize;
-                continue;
+        for (int j = 0; j < i; j++) {
+            int vj = s.sequence[j];
+            int vj_next = s.sequence[j+1];
+
+            double delta = g[vi][vi_next] + g[vj][vk_first]
+            + g[vk_last][vj_next] - g[vi][vk_first]
+            - g[vk_last][vi_next] - g[vj][vj_next];
+
+            if (delta < bestDelta) {
+                best_i = i;
+                best_j = j;
+                bestDelta = delta;
             }
+        }
+        for (int j = i + blockSize + 1; j < s.sequence.size() - 1; j++) {
             int vj = s.sequence[j];
             int vj_next = s.sequence[j+1];
 

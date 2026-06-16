@@ -26,10 +26,10 @@ double BB_TSP::construction() {
     double alpha = rd_double(rng);
 
     double cost = 0.0;
-    int last_node = 1;
+    int last_node = 0;
     
     std::unordered_set<int> CL;
-    for (int i = 2; i <= n; i++)
+    for (int i = 1; i < n; i++)
         CL.insert(i);
     
     while (!CL.empty()) {
@@ -54,7 +54,7 @@ double BB_TSP::construction() {
         last_node = x.inserted_node;
         cost += x.cost;
     }
-    cost += costs[last_node][1];
+    cost += costs[last_node][0];
 
     return cost;
 }

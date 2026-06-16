@@ -5,7 +5,7 @@
 
 #define INFINITE 99999999
 
-typedef std::pair<int, int> Edge;
+typedef std::pair<double, std::pair<int, int>> Edge;
 
 struct Node {
     int n;
@@ -33,7 +33,7 @@ struct Node {
 
     std::vector<int> get_degrees(int n);
     int get_chosen();
-    bool is_feasible();
+    // bool is_feasible();
 };
 
 #endif

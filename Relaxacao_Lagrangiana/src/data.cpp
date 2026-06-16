@@ -4,9 +4,9 @@
 Data::Data(int qtParam, char *instance)
     : xCoord(NULL), yCoord(NULL), distMatrix(NULL) {
 
-  if (qtParam < 2) {
+  if (qtParam < 3) {
     std::cout << "Missing parameters\n";
-    std::cout << " ./exeLaRP [Instance]" << std::endl;
+    std::cout << " ./exeLaRP [Instance] [Search method]" << std::endl;
     exit(1);
   }
 

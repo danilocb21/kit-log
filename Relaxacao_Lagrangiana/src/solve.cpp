@@ -1,23 +1,24 @@
-#include "BnB.hpp"
-#include "node.hpp"
+#include "bb.h"
+#include "node.h"
 
-double BnB::solve(const BranchingStrategy branching_strategy) {
-    Node root;
-    root.update(costs, N);
+double BB_TSP::solve(const BranchingStrategy branching_strategy) {
+    // Node root;
+    // root.update(costs, N);
     
-    double upper_bound = construction(); // Initial solution    
+    Solution s = construction(); // Initial solution
+    double upper_bound = s.cost;
 
-    if (branching_strategy == BranchingStrategy::BBS)
-        upper_bound = solve_pq(root, upper_bound);
-    else if (branching_strategy == BranchingStrategy::DFS)
-        upper_bound = solve_list(root, upper_bound);
-    else
-        upper_bound = solve_list2(root, upper_bound);
+    // if (branching_strategy == BranchingStrategy::DFS)
+    //     upper_bound = solve_st(root, upper_bound);
+    // else if (branching_strategy == BranchingStrategy::BFS)
+    //     upper_bound = solve_qu(root, upper_bound);
+    // else
+    //     upper_bound = solve_pq(root, upper_bound);
 
     return upper_bound;
 }
 
-double BnB::solve_pq(Node &root, double upper_bound) {
+double BB_TSP::solve_pq(Node &root, double upper_bound) {
     pq_tree.push(root);
     
     while (!pq_tree.empty()) {
@@ -31,17 +32,17 @@ double BnB::solve_pq(Node &root, double upper_bound) {
             upper_bound = std::min(upper_bound, node.lower_bound);
         else {
             int chosen = node.chosen;
-            for (size_t i = 0; i < node.subtour[chosen].size() - 1; i++) {
-                Node n = node;
+            for (int i = 0; i < (int)(node.subtour[chosen].size()) - 1; i++) {
+                Node nd = node;
 
-                n.forbidden_arcs.emplace_back(
+                nd.forbidden_arcs.emplace_back(
                     node.subtour[chosen][i],
                     node.subtour[chosen][i + 1]
                 );
 
-                n.update(costs, N);
-                if (n.lower_bound <= upper_bound)
-                    pq_tree.push(n);
+                // nd.update(costs, N);
+                if (nd.lower_bound <= upper_bound)
+                    pq_tree.push(nd);
             }
         }
     }
@@ -49,12 +50,12 @@ double BnB::solve_pq(Node &root, double upper_bound) {
     return upper_bound;
 }
 
-double BnB::solve_list(Node &root, double upper_bound) {
-    tree1.push(root);
+double BB_TSP::solve_st(Node &root, double upper_bound) {
+    stack_tree.push(root);
     
-    while (!tree1.empty()) {
-        Node node = tree1.top();
-        tree1.pop();
+    while (!stack_tree.empty()) {
+        Node node = stack_tree.top();
+        stack_tree.pop();
 
         if (node.lower_bound > upper_bound)
             continue;
@@ -63,17 +64,17 @@ double BnB::solve_list(Node &root, double upper_bound) {
             upper_bound = std::min(upper_bound, node.lower_bound);
         else {
             int chosen = node.chosen;
-            for (size_t i = 0; i < node.subtour[chosen].size() - 1; i++) {
-                Node n = node;
+            for (int i = 0; i < (int)(node.subtour[chosen].size()) - 1; i++) {
+                Node nd = node;
 
-                n.forbidden_arcs.emplace_back(
+                nd.forbidden_arcs.emplace_back(
                     node.subtour[chosen][i],
                     node.subtour[chosen][i + 1]
                 );
 
-                n.update(costs, N);
-                if (n.lower_bound <= upper_bound)
-                    tree1.push(n);
+                // nd.update(costs, N);
+                if (nd.lower_bound <= upper_bound)
+                    stack_tree.push(nd);
             }
         }
     }
@@ -82,12 +83,12 @@ double BnB::solve_list(Node &root, double upper_bound) {
 }
 
 
-double BnB::solve_list2(Node &root, double upper_bound) {
-    tree2.push(root);
+double BB_TSP::solve_qu(Node &root, double upper_bound) {
+    queue_tree.push(root);
     
-    while (!tree2.empty()) {
-        Node node = tree2.front();
-        tree2.pop();
+    while (!queue_tree.empty()) {
+        Node node = queue_tree.front();
+        queue_tree.pop();
 
         if (node.lower_bound > upper_bound)
             continue;
@@ -96,17 +97,17 @@ double BnB::solve_list2(Node &root, double upper_bound) {
             upper_bound = std::min(upper_bound, node.lower_bound);
         else {
             int chosen = node.chosen;
-            for (size_t i = 0; i < node.subtour[chosen].size() - 1; i++) {
-                Node n = node;
+            for (int i = 0; i < (int)(node.subtour[chosen].size()) - 1; i++) {
+                Node nd = node;
 
-                n.forbidden_arcs.emplace_back(
+                nd.forbidden_arcs.emplace_back(
                     node.subtour[chosen][i],
                     node.subtour[chosen][i + 1]
                 );
 
-                n.update(costs, N);
-                if (n.lower_bound <= upper_bound)
-                    tree2.push(n);
+                // nd.update(costs, N);
+                if (nd.lower_bound <= upper_bound)
+                    queue_tree.push(nd);
             }
         }
     }

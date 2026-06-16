@@ -1,9 +1,7 @@
-#ifndef NODE_HPP
-#define NODE_HPP
+#ifndef NODE_H
+#define NODE_H
 
 #include <vector>
-
-#include "hungarian.h"
 
 struct Node {
     std::vector<std::pair<int, int>> forbidden_arcs;
@@ -26,7 +24,7 @@ struct Node {
 
     // Hungarian Instance info
 
-    std::vector<std::vector<int>> get_subtours(hungarian_problem_t &p, int n);
+    //std::vector<std::vector<int>> get_subtours(hungarian_problem_t &p, int n);
     int get_chosen();
     bool is_feasible();
 };

@@ -1,8 +1,15 @@
 #include <vector>
 
 #include "data.h"
-#include "BnB.hpp"
+#include "bb.h"
 
-BnB::BnB(Data &instance, double **cost) : m_instance(instance), costs(cost) {
-    N = m_instance.getDimension();
+BB_TSP::BB_TSP(Data &instance) : m_instance(instance) {
+    n = m_instance.getDimension();
+
+    costs.resize(n+1, std::vector<double>(n+1));
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            costs[i][j] = m_instance.getDistance(i,j);
+        }
+    }
 }

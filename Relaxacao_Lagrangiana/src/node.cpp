@@ -4,70 +4,47 @@
 #include "bb.h"
 #include "node.h"
 
-#define INFINITE 99999999
+void Node::update(std::vector<std::vector<double>> &costs, double ub) {
+    std::vector<std::pair<std::pair<int, int>, double>> prev_vals;
+    for (auto arc : this->forbidden_arcs) {
+        int i = arc.first;
+        int j = arc.second;
+        prev_vals.emplace_back(arc, costs[i][j]);
+        costs[i][j] = INFINITE;
+    }
 
-// void Node::update(double **costs, int n) {
-//     std::vector<std::pair<std::pair<int, int>, double>> prev_vals;
-//     for (auto arc : this->forbidden_arcs) {
-//         int i = arc.first;
-//         int j = arc.second;
-//         prev_vals.emplace_back(arc, costs[i][j]);
-//         costs[i][j] = INFINITE;
-//     }
+    this->graph = subgradient_tsp(costs, ub);
 
-//     hungarian_problem_t p;
-//     int mode = HUNGARIAN_MODE_MINIMIZE_COST;
-//     hungarian_init(&p, costs, n, n, mode);
+    this->degree = get_degrees(n);
+    this->chosen = get_chosen();
+    this->feasible = is_feasible();
 
-//     this->lower_bound = hungarian_solve(&p);
+    for (auto arc : prev_vals) {
+        int i = arc.first.first;
+        int j = arc.first.second;
+        double c = arc.second;
+        costs[i][j] = c;
+    }
+}
 
-//     this->subtour = get_subtours(p, n);
-//     this->chosen = get_chosen();
-//     this->feasible = is_feasible();
-
-//     for (auto arc : prev_vals) {
-//         int i = arc.first.first;
-//         int j = arc.first.second;
-//         double c = arc.second;
-//         costs[i][j] = c;
-//     }
+std::vector<Edge> subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
+    double eps = 1.0;
+    double eps_min = 1e-5;
     
-//     hungarian_free(&p);
-// }
-
-// std::vector<std::vector<int>> Node::get_subtours(hungarian_problem_t &p, int n) {
-//     std::vector<std::vector<int>> subtours;
+    int iter = 0;
+    int iter_max = 30;
     
-//     std::vector<bool> visited(n);
-//     for (int i = 0; i < n; i++) {
-//         if (visited[i]) continue;
-//         int node = i;
-//         std::vector<int> subtour;
+    double lb = 0.0;
+    std::vector<Edge> best_edges;
+    
+    while (eps > eps_min) {
+        
+    }
 
-//         while (!visited[node]) {
-//             visited[node] = true;
-//             subtour.push_back(node);
-            
-//             for (int j = 0; j < n; j++) {
-//                 if (p.assignment[node][j]) {
-//                     node = j;
-//                     break;
-//                 }
-//             }
-//         }
-//         subtour.push_back(i);
+    return best_edges;
+}
 
-//         subtours.emplace_back(subtour);
-//     }
-
-//     std::sort(subtours.begin(), subtours.end(), [](const std::vector<int> &a, const std::vector<int> &b) {
-//         if (a.size() != b.size()) return a.size() < b.size();
-//         return a[0] < b[0];
-//     });
-
-//     return subtours;
-// }
-
+// Mudar para retornar o nó de maior grau
 int Node::get_chosen() { return 0; } // a lista de subtours já esta ordenada pelo menor tamanho
 
 bool Node::is_feasible() { return this->subtour.size() == 1UL; }

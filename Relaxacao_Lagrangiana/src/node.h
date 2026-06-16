@@ -3,9 +3,16 @@
 
 #include <vector>
 
+#define INFINITE 99999999
+
+typedef std::pair<int, int> Edge;
+
 struct Node {
+    int n;
+
     std::vector<std::pair<int, int>> forbidden_arcs;
-    std::vector<std::vector<int>> subtour;
+    std::vector<Edge> graph;
+    std::vector<double> lambdas;
     double lower_bound;
     int chosen;
     bool feasible;
@@ -18,13 +25,13 @@ struct Node {
         return lower_bound > p.lower_bound;
     }
 
-    Node() = default;
+    Node(int n) : lambdas(n) {};
 
-    void update(double **costs, int n);
+    void update(std::vector<std::vector<double>> &costs, double ub);
 
-    // Hungarian Instance info
+    std::vector<Edge> subgradient_tsp(std::vector<std::vector<double>> &costs, double ub);
 
-    //std::vector<std::vector<int>> get_subtours(hungarian_problem_t &p, int n);
+    std::vector<int> get_degrees(int n);
     int get_chosen();
     bool is_feasible();
 };

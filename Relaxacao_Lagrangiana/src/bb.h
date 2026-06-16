@@ -23,8 +23,8 @@ public:
     std::vector<std::vector<double>> costs;
     int n; // grid dimension
 
-    // Construct a solution with a greedy heuristic
-    Solution construction();
+    // Construct a solution with a greedy heuristic and returns its cost
+    double construction();
 
     // Branch and Bound algorithm
     double solve(const BranchingStrategy branching_strategy);

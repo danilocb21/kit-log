@@ -18,17 +18,16 @@ struct InsertionInfo {
         inserted_node(inserted_node), cost(cost) {}
 };
 
-Solution BB_TSP::construction() {
+double BB_TSP::construction() {
     std::random_device rd;
     std::mt19937 rng(rd());
     std::uniform_real_distribution<> rd_double(0.0, 0.25);
 
     double alpha = rd_double(rng);
 
-    Solution s;
-    s.cost = 0.0;
-    s.sequence.push_back(1);
-
+    double cost = 0.0;
+    int last_node = 1;
+    
     std::unordered_set<int> CL;
     for (int i = 2; i <= n; i++)
         CL.insert(i);
@@ -37,7 +36,7 @@ Solution BB_TSP::construction() {
         std::vector<InsertionInfo> insertion_costs;
         insertion_costs.reserve((CL.size()));
 
-        int r = s.sequence.back();
+        int r = last_node;
 
         for (int node : CL) {
             double cost = costs[r][node];
@@ -52,11 +51,10 @@ Solution BB_TSP::construction() {
         
         auto &x = insertion_costs[selected];
         CL.erase(x.inserted_node);
-        s.sequence.push_back(x.inserted_node);
-        s.cost += x.cost;
+        last_node = x.inserted_node;
+        cost += x.cost;
     }
-    s.cost += costs[s.sequence.back()][1];
-    s.sequence.push_back(1);
+    cost += costs[last_node][1];
 
-    return s;
+    return cost;
 }

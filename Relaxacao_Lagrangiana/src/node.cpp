@@ -16,7 +16,7 @@ void Node::update(std::vector<std::vector<double>> &costs, double ub) {
 
     subgradient_tsp(costs, ub);
     get_degrees();
-    this->chosen = get_chosen();
+    get_chosen();
     this->feasible = is_feasible();
 
     for (auto arc : prev_vals) {
@@ -40,13 +40,6 @@ void Node::subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
     std::vector<double> p_lambda = lambdas;
     
     while (eps > eps_min) {
-        bool stop = true;
-        for (int i = 0; i < n; i++) if (degrees[i] != 2) {
-            stop = false;
-            break;
-        }
-        if (stop) break;
-
         Kruskal krsk(n);
         std::pair<double, std::vector<Edge>> mst = krsk.find_mst(costs, p_lambda);
 
@@ -65,14 +58,19 @@ void Node::subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
             }
         }
 
+        int mx_deg = 0;
         for (int i = 0; i < n; i++) degrees[i] = 0;
 
         for (auto &[c, arc] : mst.second) {
             int i = arc.first;
             int j = arc.second;
             degrees[i]++;
-            degrees[j]++;    
+            degrees[j]++;
+            mx_deg = std::max({mx_deg, degrees[i], degrees[j]});
         }
+
+        // Stop condition
+        if (mx_deg == 2) break;
 
         double sqr_deg = 0.0;
         for (int i = 0; i < n; i++) {
@@ -96,31 +94,30 @@ void Node::get_degrees() {
         int i = arc.first;
         int j = arc.second;
         degrees[i]++;
-        degrees[j]++;    
+        degrees[j]++;
     }
 }
 
-// Mudar para retornar o nó de maior grau
-int Node::get_chosen() { 
-    int chosen = 0;
+void Node::get_chosen() {
     int mx_deg = 0;
-    
     for (int i = 0; i < n; i++) {
         if (mx_deg < degrees[i]) {
             mx_deg = degrees[i];
             chosen = i;
         }
     }
+    
+    chosen_node_arcs.clear();
 
-    for (auto &[c, arc] : graph) {
-        int i = arc.first;
-        int j = arc.second;
-        
-        if (i == chosen || j == chosen)
-            chosen_node_arcs.push_back( { i, j });
+    if (degrees[chosen] > 2) {
+        for (auto &[c, arc] : graph) {
+            int i = arc.first;
+            int j = arc.second;
+            
+            if (i == chosen || j == chosen)
+                chosen_node_arcs.push_back( { i, j });
+        }
     }
-
-    return chosen;
 }
 
 bool Node::is_feasible() { return degrees[chosen] == 2; }

@@ -38,7 +38,7 @@ struct Node {
     void subgradient_tsp(std::vector<std::vector<double>> &costs, double ub);
 
     void get_degrees();
-    int get_chosen();
+    void get_chosen();
     bool is_feasible();
 };
 

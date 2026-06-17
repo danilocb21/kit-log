@@ -23,6 +23,7 @@ bool Kruskal::same_set(int a, int b) {
 std::pair<double, std::vector<Edge>> Kruskal::find_mst(const std::vector<std::vector<double>> &costs, 
                                                     const std::vector<double> &lambdas) {
     std::vector<Edge> edges;
+    edges.reserve(n*(n-1)/2);
 
     // i = 0 é a origem
     for (int i = 1; i+1 < n; i++) {

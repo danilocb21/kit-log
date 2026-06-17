@@ -40,7 +40,7 @@ double BB_TSP::solve_pq(Node &root, double upper_bound) {
 
                 nd.update(costs, upper_bound);
                 if (nd.lower_bound <= upper_bound)
-                    queue_tree.push(nd);
+                    pq_tree.push(nd);
             }
         }
     }
@@ -71,7 +71,7 @@ double BB_TSP::solve_st(Node &root, double upper_bound) {
 
                 nd.update(costs, upper_bound);
                 if (nd.lower_bound <= upper_bound)
-                    queue_tree.push(nd);
+                    stack_tree.push(nd);
             }
         }
     }

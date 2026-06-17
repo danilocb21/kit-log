@@ -6,47 +6,121 @@
 #include "Kruskal.h"
 
 void Node::update(std::vector<std::vector<double>> &costs, double ub) {
-    std::vector<std::pair<std::pair<int, int>, double>> prev_vals;
+    std::vector<Edge> prev_vals;
     for (auto arc : this->forbidden_arcs) {
         int i = arc.first;
         int j = arc.second;
-        prev_vals.emplace_back(arc, costs[i][j]);
+        prev_vals.emplace_back(costs[i][j], arc);
         costs[i][j] = INFINITE;
     }
 
-    this->graph = subgradient_tsp(costs, ub);
-
-    // this->degree = get_degrees(n);
+    subgradient_tsp(costs, ub);
+    get_degrees();
     this->chosen = get_chosen();
-    // this->feasible = is_feasible();
+    this->feasible = is_feasible();
 
     for (auto arc : prev_vals) {
-        int i = arc.first.first;
-        int j = arc.first.second;
-        double c = arc.second;
+        double c = arc.first;
+        int i = arc.second.first;
+        int j = arc.second.second;
         costs[i][j] = c;
     }
 }
 
-std::vector<Edge> Node::subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
+void Node::subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
     double eps = 1.0;
     double eps_min = 1e-5;
     
     int iter = 0;
     int iter_max = 30;
     
-    double lb = 0.0;
+    double best_lb = 0.0;
     std::vector<Edge> best_edges;
+
+    std::vector<double> p_lambda = lambdas;
     
     while (eps > eps_min) {
+        bool stop = true;
+        for (int i = 0; i < n; i++) if (degrees[i] != 2) {
+            stop = false;
+            break;
+        }
+        if (stop) break;
+
         Kruskal krsk(n);
-        std::pair<double, std::vector<Edge>> mst = krsk.find_mst(costs, lambdas);
-        break;
+        std::pair<double, std::vector<Edge>> mst = krsk.find_mst(costs, p_lambda);
+
+        double lb = mst.first;
+        if (lb > best_lb) {
+            best_lb = lb;
+            best_edges = mst.second;
+            lambdas = p_lambda;
+            iter = 0;
+        }
+        else {
+            iter++;
+            if (iter == iter_max) {
+                iter = 0;
+                eps /= 2;
+            }
+        }
+
+        for (int i = 0; i < n; i++) degrees[i] = 0;
+
+        for (auto &[c, arc] : mst.second) {
+            int i = arc.first;
+            int j = arc.second;
+            degrees[i]++;
+            degrees[j]++;    
+        }
+
+        double sqr_deg = 0.0;
+        for (int i = 0; i < n; i++) {
+            sqr_deg += (2 - degrees[i]) * (2 - degrees[i]);
+        }
+
+        double step = eps * ((ub - lb) / sqr_deg);
+        for (int i = 0; i < n; i++) {
+            p_lambda[i] = p_lambda[i] + step * (2 - degrees[i]);
+        }
     }
-    return best_edges;
+
+    this->lower_bound = best_lb;
+    this->graph = best_edges;
+}
+
+void Node::get_degrees() {
+    for (int i = 0; i < n; i++) degrees[i] = 0;
+
+    for (auto &[c, arc] : graph) {
+        int i = arc.first;
+        int j = arc.second;
+        degrees[i]++;
+        degrees[j]++;    
+    }
 }
 
 // Mudar para retornar o nó de maior grau
-int Node::get_chosen() { return 0; } // a lista de subtours já esta ordenada pelo menor tamanho
+int Node::get_chosen() { 
+    int chosen = 0;
+    int mx_deg = 0;
+    
+    for (int i = 0; i < n; i++) {
+        if (mx_deg < degrees[i]) {
+            mx_deg = degrees[i];
+            chosen = i;
+        }
+    }
 
-// bool Node::is_feasible() { return this->subtour.size() == 1UL; }
+    for (auto &[c, arc] : graph) {
+        int i = arc.first;
+        int j = arc.second;
+        
+        if (i == chosen || j == chosen)
+            chosen_node_arcs.push_back( { i, j });
+    }
+
+    return chosen;
+}
+
+bool Node::is_feasible() { return degrees[chosen] == 2; }

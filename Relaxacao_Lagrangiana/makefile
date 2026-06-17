@@ -5,14 +5,21 @@ BITS_OPTION = -m64
 CPPC = g++
 #############################
 
-#### opcoes de compilacao e includes
-CCOPT = $(BITS_OPTION) -Iinclude -Wall -O3 -g -march=native -flto -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -MMD -MP
+#### Flag condicional para Debug (Padrão é 0/Release)
+DEBUG ?= 0
+
+ifeq ($(DEBUG), 1)
+    # Modo Debug: Sem otimização (-O0), máximo de símbolos de debug (-g3), mantém os asserts
+    CCOPT = $(BITS_OPTION) -Iinclude -Wall -O0 -g3 -fPIC -fexceptions -DIL_STD -std=c++17 -MMD -MP
+    CCLNFLAGS = $(BITS_OPTION) -lpthread -lm
+else
+    # Modo Release: Otimização máxima (-O3), LTO, ignora asserts (-DNDEBUG)
+    CCOPT = $(BITS_OPTION) -Iinclude -Wall -O3 -g -march=native -flto -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -MMD -MP
+    CCLNFLAGS = $(BITS_OPTION) -O3 -flto -march=native -lpthread -lm
+endif
+
 CONCERTINCDIR = $(CONCERTDIR)/include
 CCFLAGS = $(CCOPT)
-#############################
-
-#### flags do linker
-CCLNFLAGS = $(BITS_OPTION) -O3 -flto -march=native -lpthread -lm
 #############################
 
 #### diretorios com os source files e com os objs files
@@ -35,7 +42,6 @@ tsp: $(OBJS)
 -include $(OBJS:.o=.d)
 
 #regra para cada arquivo objeto: compila e gera o arquivo de dependencias do arquivo objeto
-#cada arquivo objeto depende do .c e dos headers (informacao dos header esta no arquivo de dependencias gerado pelo compiler)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p obj
 	@echo  "\033[31m \nCompiling $<: \033[0m"
@@ -45,6 +51,5 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 clean:
 	@echo "\033[31mcleaning obj directory \033[0m"
 	@rm tsp -f $(OBJDIR)/*.o $(OBJDIR)/*.d
-
 
 rebuild: clean tsp

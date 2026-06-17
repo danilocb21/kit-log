@@ -12,6 +12,8 @@ struct Node {
 
     std::vector<std::pair<int, int>> forbidden_arcs;
     std::vector<Edge> graph;
+    std::vector<std::pair<int, int>> chosen_node_arcs;
+    std::vector<int> degrees;
     std::vector<double> lambdas;
     double lower_bound;
     int chosen;
@@ -25,15 +27,19 @@ struct Node {
         return lower_bound > p.lower_bound;
     }
 
-    Node(int n) : lambdas(n) {};
+    Node(int n_) {
+        n = n_;
+        degrees.resize(n);
+        lambdas.resize(n);
+    };
 
     void update(std::vector<std::vector<double>> &costs, double ub);
 
-    std::vector<Edge> subgradient_tsp(std::vector<std::vector<double>> &costs, double ub);
+    void subgradient_tsp(std::vector<std::vector<double>> &costs, double ub);
 
-    std::vector<int> get_degrees(int n);
+    void get_degrees();
     int get_chosen();
-    // bool is_feasible();
+    bool is_feasible();
 };
 
 #endif

@@ -19,11 +19,11 @@ struct InsertionInfo {
 };
 
 double BB_TSP::construction() {
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_real_distribution<> rd_double(0.0, 0.25);
+    // std::random_device rd;
+    // std::mt19937 rng(rd());
+    // std::uniform_real_distribution<> rd_double(0.0, 0.25);
 
-    double alpha = rd_double(rng);
+    // double alpha = rd_double(rng);
 
     double cost = 0.0;
     int last_node = 0;
@@ -45,9 +45,11 @@ double BB_TSP::construction() {
 
         sort(insertion_costs.begin(), insertion_costs.end());
 
-        std::uniform_int_distribution<> dist(0, alpha * static_cast<double>(insertion_costs.size() - 1));
+        // std::uniform_int_distribution<> dist(0, alpha * static_cast<double>(insertion_costs.size() - 1));
 
-        int selected = dist(rng);
+        // int selected = dist(rng);
+
+        int selected = 0; // first node
         
         auto &x = insertion_costs[selected];
         CL.erase(x.inserted_node);

@@ -69,6 +69,8 @@ void Node::subgradient_tsp(std::vector<std::vector<double>> &costs, double ub) {
             mx_deg = std::max({mx_deg, degrees[i], degrees[j]});
         }
 
+        if (lb >= ub) break;
+
         // Stop condition
         if (mx_deg == 2) break;
 

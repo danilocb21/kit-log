@@ -6,7 +6,7 @@ k=1
 echo "Instance,Time DFS(s),Cost DFS,Time BFS(s),Cost BFS,Time BBS(s),Cost BBS" > ./output.csv
 
 for instance in instances/*; do
-    echo "Instance $k of 9"
+    echo "Instance $k of 22"
 
     output="$(basename "$instance")"
     

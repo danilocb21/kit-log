@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 		branching_strategy = BB_TSP::BranchingStrategy::BBS;
 
 	
-	int runs = 10;
+	int runs = 1;
     double total_time = 0.0, total_cost = 0.0;
 
     for (int i = 0; i < runs; i++) {

@@ -5,7 +5,7 @@
 
 #include "construction.h"
 
-double construction::construc(double** costs, int n) {
+double construc(double** costs, int n) {
     // std::random_device rd;
     // std::mt19937 rng(rd());
     // std::uniform_real_distribution<> rd_double(0.0, 0.25);

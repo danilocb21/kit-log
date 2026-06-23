@@ -1,10 +1,7 @@
-#ifndef CONSTRUCTION
-#define CONSTRUCTION
+#ifndef CONSTRUCTION_H
+#define CONSTRUCTION_H
 
-struct construction
-{
-    static double construc(double **costs, int n);
-};
+double construc(double **costs, int n);
 
 struct InsertionInfo {
     int inserted_node;

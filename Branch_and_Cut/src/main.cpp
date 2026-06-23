@@ -136,7 +136,7 @@ int main(int argc, char** argv)
     data->readData();
 
     if (ub >= numeric_limits<double>::max())
-        ub = construction::construc(data->getMatrixCost(), data->getDimension());
+        ub = construc(data->getMatrixCost(), data->getDimension());
 
     string instanceName = getInstanceName(argv);
     STSP_Solve(data, instanceName, ub);

@@ -32,3 +32,9 @@ Run the executable:
 ```
 ./<build_directory>/src/mlp ./data/instances/<instance>
 ```
+
+#### Clean the build:
+
+```
+meson compile --clean -C <build_directory>
+```

@@ -3,17 +3,22 @@
 #include "MLP.hpp"
 #include "solution.hpp"
 
-Solution MLP::GILS_RVND(const size_t max_iterations, const size_t max_ils_iterations, const double alpha) {
+Solution MLP::GILS_RVND(const size_t max_iterations, const size_t max_ils_iterations) {
     Solution best_found;
     best_found.cost = std::numeric_limits<double>::max();
+    
+    std::uniform_int_distribution<> dist(0, 25);
 
-    for (size_t i = 0; i < max_iterations; i++) {
+    for (int i = 0; i < max_iterations; i++) {
+
+        double alpha = dist(m_generator) / 100.0;
+
         Solution solution = rand_cheapest_insertion(alpha);
         Solution best = solution;
 
-        size_t iteration_ils = 0;
+        int iteration_ils = 0;
         
-        while (iteration_ils <= max_ils_iterations) {
+        while (iteration_ils < max_ils_iterations) {
             RVND(solution);
 
             if (solution.cost < best.cost) {

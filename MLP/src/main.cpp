@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <random>
@@ -14,31 +13,26 @@ int main(int argc, char **argv) {
 
     MLP mlp = MLP(data);
 
-    size_t max_iterations = 10;
-    size_t max_ils_iterations = static_cast<size_t>(min(data.getDimension(), 100));;
-    
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<> dist(0, 25);
+    uint8_t max_iterations = 10;
+    uint8_t max_ils_iterations = std::min(data.getDimension(), 100);
 
-    size_t runs = 10;
+    uint8_t runs = 10;
     double total_time = 0.0, total_cost = 0.0;
 
-    for (size_t i = 0; i < runs; i++) {
-        double alpha = dist(rng) / 100.0;
+    for (uint8_t i = 0; i < runs; i++) {
 
-        auto start = chrono::high_resolution_clock::now();
+        auto start = std::chrono::high_resolution_clock::now();
 
-        Solution s = mlp.GILS_RVND(max_iterations, max_ils_iterations, alpha);
+        Solution s = mlp.GILS_RVND(max_iterations, max_ils_iterations);
 
-        auto end = chrono::high_resolution_clock::now();
+        auto end = std::chrono::high_resolution_clock::now();
 
-        chrono::duration<double> duration = end - start;
+        std::chrono::duration<double> duration = end - start;
         total_time += duration.count();
         total_cost += s.cost;
     }
     
-    std::cout << std::fixed << total_time / runs << ' ' << total_cost / runs << "\n\n";
+    std::cout << total_time / runs << ' ' << total_cost / runs << '\n';
 
     return 0;
 }

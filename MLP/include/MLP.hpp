@@ -39,7 +39,7 @@ public:
 
     // Metaheuristics
 
-    Solution GILS_RVND(const size_t max_iterations, const size_t max_ils_iterations, const double alpha);
+    Solution GILS_RVND(const size_t max_iterations, const size_t max_ils_iterations);
 
     // Subsequences calls
 

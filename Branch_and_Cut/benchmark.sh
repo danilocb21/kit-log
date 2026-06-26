@@ -1,11 +1,10 @@
 #!/bin/bash
 make rebuild
 
-TIME_LIMIT=150 
 k=1
 
 if [ ! -f ./output.csv ]; then
-    echo "Instance,Time DFS(s),Cost DFS,Time BFS(s),Cost BFS,Time BBS(s),Cost BBS" > ./output.csv
+    echo "Instance,Tree Size,Time(s),Lower Bound,Upper Bound,Status" > ./output.csv
 fi
 
 for instance in instances/*; do
@@ -17,27 +16,25 @@ for instance in instances/*; do
         continue
     fi
 
-    echo "Instance $k of 22"
+    echo "Instance $k of 58"
     output="${inst_name}"
     
-    for strategy in DFS BFS BBS; do
-        echo "Processando ${inst_name} com $strategy"
-        
-        out_cpp=$(timeout $TIME_LIMIT ./tsp "${instance}" $strategy)
-        exit_status=$?
+    echo "Processando ${inst_name}"
+    
+    out_cpp=$(./tsp "${instance}")
+    exit_status=$?
 
-        if [ $exit_status -eq 124 ]; then
-            echo " -> TIMEOUT ($strategy)"
-            out_csv="TIMEOUT,TIMEOUT"
-        elif [ $exit_status -ne 0 ]; then
-            echo " -> ERRO ($strategy)"
-            out_csv="ERROR,ERROR"
-        else
-            out_csv="${out_cpp// /,}"
-        fi
-        
-        output="${output},${out_csv}"
-    done
+    if [ $exit_status -eq 124 ]; then
+        echo " -> TIMEOUT"
+        out_csv="TIMEOUT,TIMEOUT,TIMEOUT,TIMEOUT,TIMEOUT"
+    elif [ $exit_status -ne 0 ]; then
+        echo " -> ERROR"
+        out_csv="ERROR,ERROR,ERROR,ERROR,ERROR"
+    else
+        out_csv="${out_cpp// /,}"
+    fi
+    
+    output="${output},${out_csv}"
     
     echo "$output" >> ./output.csv
     

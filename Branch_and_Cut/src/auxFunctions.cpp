@@ -28,14 +28,20 @@ string getInstanceName(char **argv)
 void printResults(IloCplex cplex, string instanceName, double time)
 {
 
-	cout << "\n\nBranch-and-cut_Results: \n" << endl;
+	// cout << "\n\nBranch-and-cut_Results: \n" << endl;
 
-	cout << "Instance: " << instanceName << endl;
-	cout << "Tree_Size: " << cplex.getNnodes() + cplex.getNnodesLeft() + 1 << endl;
-	cout << "Total_Time: " << time << endl;
-	cout << "LB: " << cplex.getBestObjValue() << endl;
-	cout << "UB: " << cplex.getObjValue() << endl; 
-	cout << "Status: " << cplex.getStatus() << endl;
+	// cout << "Instance: " << instanceName << endl;
+	// cout << "Tree_Size: " << cplex.getNnodes() + cplex.getNnodesLeft() + 1 << endl;
+	// cout << "Total_Time: " << time << endl;
+	// cout << "LB: " << cplex.getBestObjValue() << endl;
+	// cout << "UB: " << cplex.getObjValue() << endl; 
+	// cout << "Status: " << cplex.getStatus() << endl;
+
+	cout << cplex.getNnodes() + cplex.getNnodesLeft() + 1 << ' '
+		<< time << ' '
+		<< cplex.getBestObjValue() << ' '
+		<< cplex.getObjValue() << ' '
+		<< cplex.getStatus() << endl;
 }
 
 void printResultsToFile(IloCplex cplex, string instanceName, double time)

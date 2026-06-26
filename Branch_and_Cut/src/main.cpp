@@ -77,6 +77,9 @@ void STSP_Solve(Data *data, string instanceName, double ub)
     STSP.setParam(IloCplex::Threads, 1);
     STSP.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 1e-08);
     STSP.setParam(IloCplex::CutUp, ub);
+    STSP.setOut(env.getNullStream());
+    STSP.setWarning(env.getNullStream());
+
     //STSP.exportModel("stsp.lp");
 
     double timeBefore, timeAfter;
@@ -108,7 +111,7 @@ void STSP_Solve(Data *data, string instanceName, double ub)
     }
 
     printResults(STSP, instanceName, timeAfter-timeBefore);
-	printSolution(STSP, x, dimension);
+	// printSolution(STSP, x, dimension);
 	//printResultsToFile(STSP, instanceName, timeAfter-timeBefore);
     /******************************************************/
 

@@ -1,4 +1,6 @@
+#include "data.h"
 #include "gurobi_c++.h"
+
 using namespace std;
 
 // modelo exemplo
@@ -8,12 +10,23 @@ using namespace std;
     subject to  x + 2 y + 3 z <= 4
                 x +   y       >= 1
                 x, y, z binary
-*/            
+*/
 
 int main(int argc, char** argv) {
+    
+    auto data = Data(argc, argv[1]);
+    data.read();
+
+    cout << data.getDimension() << ' ' << data.getCapacity() << '\n';
+    for (int i = 0; i < data.getDimension(); i++)
+        cout << data.getWeight(i) << " \n"[i==data.getDimension()-1];
+
+    return 0;
+
+    
     try {
         GRBEnv env = GRBEnv(true);
-        env.set("LogFile", "mip1.log");
+        //env.set("LogFile", "mip1.log");
         env.start();
 
         GRBModel model = GRBModel(env);
@@ -44,7 +57,7 @@ int main(int argc, char** argv) {
         cout << "Obj: " << model.get(GRB_DoubleAttr_ObjVal) << endl;
 
 
-    } catch (GRBException e){
+    } catch (GRBException &e){
         cout << "Error code: " << e.getErrorCode() << endl;
         cout << e.getMessage() << endl;
     } catch (...) {

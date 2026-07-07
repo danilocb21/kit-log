@@ -6,6 +6,8 @@
 #include "data.h"
 #include "gurobi_c++.h"
 
+#define EPS 1e-6
+
 class BP {
 private:
     Data instance;
@@ -21,6 +23,7 @@ public:
     std::vector<int> weight;
 
     void solve();
+    inline void column_gen(GRBModel &model, GRBVar* lmbda, GRBConstr* constrs, int &n_lmbda);
     void print_results(const GRBModel &model, const std::string &instanceName);
     void print_solution(const GRBModel &model);
 

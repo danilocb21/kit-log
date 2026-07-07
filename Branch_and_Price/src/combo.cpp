@@ -1,3 +1,4 @@
+#include "combo.h"
 
 /* ======================================================================
       	     combo.c,    S.Martello, D.Pisinger, P.Toth     feb 1997
@@ -89,22 +90,22 @@
 				 type declarations
    ====================================================================== */
 
-typedef int           boolean; /* logical variable         */
-typedef int           ntype;   /* number of states/items   */
-typedef long          itype;   /* item profits and weights */
-typedef long          stype;   /* sum of profit or weight  */
-typedef unsigned long btype;   /* binary solution vector   */
-typedef double        prod;    /* product of state, item   */
+// typedef int           boolean; /* logical variable         */
+// typedef int           ntype;   /* number of states/items   */
+// typedef long          itype;   /* item profits and weights */
+// typedef long          stype;   /* sum of profit or weight  */
+// typedef unsigned long btype;   /* binary solution vector   */
+// typedef double        prod;    /* product of state, item   */
 
-typedef int (*funcptr) (const void *, const void *);
+// typedef int (*funcptr) (const void *, const void *);
 
-/* item record */
-typedef struct {
-  itype   p;              /* profit                  */
-  itype   w;              /* weight                  */
-  boolean x;              /* solution variable       */
-    int index;
-} item;
+// /* item record */
+// typedef struct {
+//   itype   p;              /* profit                  */
+//   itype   w;              /* weight                  */
+//   boolean x;              /* solution variable       */
+//     int index;
+// } item;
 
 /* interval record */
 typedef struct {
@@ -1212,7 +1213,7 @@ static void findbreak(allinfo *a)
 				combo
    ====================================================================== */
 
-inline extern stype combo(item *f, item *l, stype c, stype lb, stype ub,
+stype combo(item *f, item *l, stype c, stype lb, stype ub,
             boolean def, boolean relx)
 /* f,l : first, last item                                               */
 /* c   : capacity of knapsack                                           */

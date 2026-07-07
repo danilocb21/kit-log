@@ -35,7 +35,7 @@ void BP::print_results(const GRBModel &model, const string &instanceName) {
         break;
 
     default:
-        cout << "Didn't solve";
+        cout << "Didn't solve ( " << model.get(GRB_IntAttr_Status) << " )";
         break;
     }
     cout << endl;

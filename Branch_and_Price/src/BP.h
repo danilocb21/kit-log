@@ -23,8 +23,8 @@ public:
     std::vector<int> weight;
 
     void solve();
-    inline void column_gen(GRBModel &model, GRBVar* lmbda, GRBConstr* constrs, int &n_lmbda);
-    void print_results(const GRBModel &model, const std::string &instanceName);
+    inline void column_gen(GRBModel &model, std::vector<GRBVar> &lmbda, std::vector<GRBConstr> &constrs, int &n_lmbda);
+    void print_results(const GRBModel &model, double duration, const std::string &instanceName);
     void print_solution(const GRBModel &model);
 
     BP(Data &data, double ub_);

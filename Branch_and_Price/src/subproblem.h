@@ -3,12 +3,15 @@
 
 #include <vector>
 #include "combo.h"
+#include "gurobi_c++.h"
 
 using namespace std;
 
 #define INF 2e18
 #define bigM 1e6
 
+#define SOLVE_MODEL 0
+#define SOLVE_DP 1
 struct SubProblem {
     int n;
     vector<double> price;
@@ -17,7 +20,9 @@ struct SubProblem {
     vector<int> solution;
 
     SubProblem(int n_, vector<double> &p, vector<int> &w, double c); 
-    void solve();
+    void solve(int method, GRBEnv* env);
+    void solve_dp();
+    void solve_model(GRBEnv* env);
 };
 
 #endif

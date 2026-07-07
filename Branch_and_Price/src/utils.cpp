@@ -6,13 +6,13 @@
 
 using namespace std;
 
-void BP::print_results(const GRBModel &model, const string &instanceName) {
+void BP::print_results(const GRBModel &model, double duration, const string &instanceName) {
     cout << "\n\nBranch-and-Price_Results: \n" << endl;
 
 	cout << "Instance: " << instanceName << endl;
     cout << "Tree_Size: " << model.get(GRB_DoubleAttr_NodeCount) 
                             + model.get(GRB_DoubleAttr_OpenNodeCount) << endl;
-    cout << "Total_Time: " << model.get(GRB_DoubleAttr_Runtime) << endl;
+    cout << "Total_Time: " << duration << endl;
     cout << "Total_Memory_Used (MB): " << model.get(GRB_DoubleAttr_MaxMemUsed) * 1024 << endl;
     cout << "LB: " << model.get(GRB_DoubleAttr_ObjBound) << endl;
     cout << "UB: " << model.get(GRB_DoubleAttr_ObjVal) << endl;

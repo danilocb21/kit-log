@@ -53,7 +53,7 @@ void BP::solve() {
         std::chrono::duration<double> duration = end - start;
 
         print_results(model, duration.count(), instance.getInstanceName());
-        //print_solution(model);
+        print_solution(model, lmbda, constrs);
         
     } catch (GRBException &e){
         cout << "Error code: " << e.getErrorCode() << endl;

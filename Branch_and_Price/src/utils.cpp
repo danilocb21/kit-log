@@ -41,6 +41,25 @@ void BP::print_results(const GRBModel &model, double duration, const string &ins
     cout << endl;
 }
 
-void BP::print_solution(const GRBModel &model) {
-    
+void BP::print_solution(GRBModel &model, const std::vector<GRBVar> &vars, const std::vector<GRBConstr> &constrs) {
+    cout << "\nSolution:\n";
+
+    int numVars = (int) vars.size();
+    int numConstrs = (int) constrs.size();
+
+    int bins = 0;
+    for (int j = 0; j < numVars; j++) {
+        double xj = vars[j].get(GRB_DoubleAttr_X);
+        if (xj <= EPS) continue;
+        bins++;
+        cout << "Bin " << bins << ": ";
+
+        for (int i = 0; i < numConstrs; i++) {
+            double coeff = model.getCoeff(constrs[i], vars[j]);
+            if (coeff <= EPS) continue;
+
+            cout << constrs[i].get(GRB_StringAttr_ConstrName) << ' ';
+        }
+        cout << endl;
+    }
 }

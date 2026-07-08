@@ -25,7 +25,7 @@ public:
     void solve();
     inline void column_gen(GRBModel &model, std::vector<GRBVar> &lmbda, std::vector<GRBConstr> &constrs, int &n_lmbda);
     void print_results(const GRBModel &model, double duration, const std::string &instanceName);
-    void print_solution(const GRBModel &model);
+    void print_solution(GRBModel &model, const std::vector<GRBVar> &vars, const std::vector<GRBConstr> &constrs);
 
     BP(Data &data, double ub_);
 };

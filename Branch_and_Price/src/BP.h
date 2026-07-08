@@ -6,7 +6,7 @@
 #include "data.h"
 #include "gurobi_c++.h"
 
-#define EPS 1e-6
+#define EPS 3e-6
 
 class BP {
 private:

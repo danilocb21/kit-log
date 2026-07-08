@@ -80,7 +80,7 @@ inline void BP::column_gen(
         }
         
         SubProblem knps(n, duals, weight, capacity);
-        knps.solve(SOLVE_MODEL, env);
+        knps.solve(SOLVE_DP, env);
 
         if (knps.objVal + EPS >= 0.0) {
             break;

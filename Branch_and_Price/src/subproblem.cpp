@@ -19,7 +19,7 @@ void SubProblem::solve(int method, GRBEnv* env) {
 void SubProblem::solve_dp() {
     vector<item> items(n);
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; i++) {
         items[i].p = (itype) llround(price[i] * bigM);
         items[i].w = (itype) weight[i];
         items[i].x = 0;

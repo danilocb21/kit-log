@@ -1,6 +1,5 @@
 #include <iostream>
 #include <chrono>
-#include <set>
 
 #include "BP.h"
 #include "node.h"
@@ -24,7 +23,7 @@ void BP::solve() {
 
         model.set(GRB_StringAttr_ModelName, "Branch and Price");
         model.set(GRB_DoubleParam_TimeLimit, 1*60*60);
-        model.set(GRB_IntParam_Threads, 1);
+        //model.set(GRB_IntParam_Threads, 1);
         model.set(GRB_DoubleParam_Cutoff, ub);
         model.set(GRB_DoubleParam_FeasibilityTol, EPS);
         
@@ -73,7 +72,10 @@ void BP::branch(
     vector<GRBConstr> &constrs,
     int &n_lmbda
 ) {
-    vector<set<int>> lmbd_itens;
+    vector<bool> lmbd_itens(n * n);
+    for (int i = 0; i < n; i++)
+        lmbd_itens[at(i,i)] = true;
+
     Node root;
     column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, root, SOLVE_DP);
     
@@ -92,14 +94,14 @@ void BP::branch(
 
             new_node.reqrd_pairs.push_back(node.most_fract);
             column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
-            if (new_node.lb <= ub)
+            if (new_node.lb < ub)
                 tree.push_back(new_node);
 
             new_node.reqrd_pairs.pop_back();
 
             new_node.frbnd_pairs.push_back(node.most_fract);
             column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
-            if (new_node.lb <= ub)
+            if (new_node.lb < ub)
                 tree.push_back(new_node);
         }
     }
@@ -108,7 +110,7 @@ void BP::branch(
 inline void BP::column_gen(
     GRBModel &model, 
     vector<GRBVar> &lmbda,
-    vector<set<int>> &lmbd_itens,
+    vector<bool> &lmbd_itens,
     vector<GRBConstr> &constrs, 
     int &n_lmbda,
     Node &node,
@@ -117,15 +119,15 @@ inline void BP::column_gen(
 
     // Proibindo lambdas onde um par esta proibido
     // ou entao que nao contenha o par requerido
-    vector<GRBVar> frbd_lmbdas;
+    vector<int> idx_add;
     vector<bool> add_lmbdas(n_lmbda);
 
     for (auto [i,j] : node.frbnd_pairs) {
         for (int k = 0; k < n_lmbda; k++) {
-            if (!add_lmbdas[k] && lmbd_itens[k].count(i) && lmbd_itens[k].count(j)) {
+            if (!add_lmbdas[k] && lmbd_itens[at(k,i)] && lmbd_itens[at(k,j)]) {
                 lmbda[k].set(GRB_DoubleAttr_UB, 0.0);
-                frbd_lmbdas.push_back(lmbda[k]);
                 add_lmbdas[k] = true;
+                idx_add.push_back(k);
             }
         }
     }
@@ -134,10 +136,10 @@ inline void BP::column_gen(
         for (int k = 0; k < n_lmbda; k++) {
     //                              A soma = 1 significa que um 
     //                              item esta incluido mas o outro nao
-            if (!add_lmbdas[k] && lmbd_itens[k].count(i) + lmbd_itens[k].count(j) == 1) {
+            if (!add_lmbdas[k] && lmbd_itens[at(k,i)] + lmbd_itens[at(k,j)] == 1) {
                 lmbda[k].set(GRB_DoubleAttr_UB, 0.0);
-                frbd_lmbdas.push_back(lmbda[k]);
                 add_lmbdas[k] = true;
+                idx_add.push_back(k);
             }
         }
     }
@@ -176,28 +178,25 @@ inline void BP::column_gen(
     node.most_fract = sol.second;
 
     // reativando os padroes proibidos
-    for (auto &lmbd : frbd_lmbdas)
-        lmbd.set(GRB_DoubleAttr_UB, GRB_INFINITY);
-        
+    for (int j : idx_add)
+        lmbda[j].set(GRB_DoubleAttr_UB, GRB_INFINITY);
 }
 
 inline pair<double, Pair> BP::most_fractional(
     GRBModel &model, 
     vector<GRBVar> &lmbda,
-    vector<set<int>> &lmbd_itens, 
+    vector<bool> &lmbd_itens, 
     vector<GRBConstr> &constrs, 
     int &n_lmbda
 ) {
-    int old_sz = lmbd_itens.size();
-    lmbd_itens.resize(n_lmbda);
-
-    int numConstrs = (int) constrs.size();
+    // Pega a ultima linha antes do resize
+    int old_sz = lmbd_itens.size() / n;
+    lmbd_itens.resize(n_lmbda * n);
 
     for (int j = old_sz; j < n_lmbda; j++) {
-        for (int i = 0; i < numConstrs; i++) {
+        for (int i = 0; i < n; i++) {
             double coeff = model.getCoeff(constrs[i], lmbda[j]);
-            if (coeff > EPS)
-                lmbd_itens[j].emplace(i);
+            lmbd_itens[at(j,i)] = coeff > EPS;
         }
     }
 
@@ -208,7 +207,7 @@ inline pair<double, Pair> BP::most_fractional(
         for (int j = i+1; j < n; j++) {
             double sum = 0.0;
             for (int k = 0; k < n_lmbda; k++) {
-                if (!lmbd_itens[k].count(i) || !lmbd_itens[k].count(j)) continue;
+                if (!lmbd_itens[at(k,i)] || !lmbd_itens[at(k,j)]) continue;
                 sum += lmbda[k].get(GRB_DoubleAttr_X);
             }
             
@@ -221,4 +220,8 @@ inline pair<double, Pair> BP::most_fractional(
     }
 
     return make_pair(mst_fract, mst_fract_pair);
+}
+
+inline int BP::at(int i, int j) {
+    return i * n + j;
 }

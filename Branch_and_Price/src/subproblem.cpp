@@ -50,7 +50,7 @@ void SubProblem::solve_model(Node &node, GRBEnv* env) {
 
     model.set(GRB_StringAttr_ModelName, "Knapsack Problem");
     model.set(GRB_DoubleParam_TimeLimit, 1*60*60);
-    model.set(GRB_IntParam_Threads, 1);
+    //model.set(GRB_IntParam_Threads, 1);
 
     vector<GRBVar> x(n);
     for (int i = 0; i < n; i++) {

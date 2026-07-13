@@ -147,6 +147,8 @@ inline void BP::column_gen(
     while (true) {
         model.optimize();
 
+        if (model.get(GRB_DoubleAttr_ObjBound) >= ub) break;
+
         vector<double> duals(n);
         for (int i = 0; i < n; i++) {
             duals[i] = constrs[i].get(GRB_DoubleAttr_Pi);
@@ -173,6 +175,8 @@ inline void BP::column_gen(
     }
 
     node.lb = model.get(GRB_DoubleAttr_ObjBound);
+    if (node.lb >= ub) return;
+    
     auto sol = most_fractional(model, lmbda, lmbd_itens, constrs, n_lmbda);
     node.most_fract_val = sol.first;
     node.most_fract = sol.second;

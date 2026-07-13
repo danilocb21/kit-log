@@ -1,7 +1,9 @@
 #include <iostream>
 #include <chrono>
+#include <set>
 
 #include "BP.h"
+#include "node.h"
 #include "subproblem.h"
 #include "gurobi_c++.h"
 
@@ -46,7 +48,7 @@ void BP::solve() {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        column_gen(model, lmbda, constrs, n_lmbda);
+        branch(model, lmbda, constrs, n_lmbda);
 
         auto end = std::chrono::high_resolution_clock::now();
 
@@ -65,12 +67,81 @@ void BP::solve() {
     delete env;
 }
 
-inline void BP::column_gen(
-    GRBModel &model, 
-    vector<GRBVar> &lmbda, 
-    vector<GRBConstr> &constrs, 
+void BP::branch(
+    GRBModel &model,
+    vector<GRBVar> &lmbda,
+    vector<GRBConstr> &constrs,
     int &n_lmbda
 ) {
+    vector<set<int>> lmbd_itens;
+    Node root;
+    column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, root, SOLVE_DP);
+    
+    tree.push_back(root);
+
+    while (!tree.empty()) {
+        Node node = tree.back();
+        tree.pop_back();
+
+        if (ceil(node.lb) >= ub) continue;
+
+        if (node.is_feasible()) {
+            ub = min(ub, node.lb);
+        } else {
+            Node new_node = node;
+
+            new_node.reqrd_pairs.push_back(node.most_fract);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
+            if (new_node.lb <= ub)
+                tree.push_back(new_node);
+
+            new_node.reqrd_pairs.pop_back();
+
+            new_node.frbnd_pairs.push_back(node.most_fract);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
+            if (new_node.lb <= ub)
+                tree.push_back(new_node);
+        }
+    }
+}
+
+inline void BP::column_gen(
+    GRBModel &model, 
+    vector<GRBVar> &lmbda,
+    vector<set<int>> &lmbd_itens,
+    vector<GRBConstr> &constrs, 
+    int &n_lmbda,
+    Node &node,
+    int method
+) {
+
+    // Proibindo lambdas onde um par esta proibido
+    // ou entao que nao contenha o par requerido
+    vector<GRBVar> frbd_lmbdas;
+    vector<bool> add_lmbdas(n_lmbda);
+
+    for (auto [i,j] : node.frbnd_pairs) {
+        for (int k = 0; k < n_lmbda; k++) {
+            if (!add_lmbdas[k] && lmbd_itens[k].count(i) && lmbd_itens[k].count(j)) {
+                lmbda[k].set(GRB_DoubleAttr_UB, 0.0);
+                frbd_lmbdas.push_back(lmbda[k]);
+                add_lmbdas[k] = true;
+            }
+        }
+    }
+
+    for (auto [i,j] : node.reqrd_pairs) {
+        for (int k = 0; k < n_lmbda; k++) {
+    //                              A soma = 1 significa que um 
+    //                              item esta incluido mas o outro nao
+            if (!add_lmbdas[k] && lmbd_itens[k].count(i) + lmbd_itens[k].count(j) == 1) {
+                lmbda[k].set(GRB_DoubleAttr_UB, 0.0);
+                frbd_lmbdas.push_back(lmbda[k]);
+                add_lmbdas[k] = true;
+            }
+        }
+    }
+
     while (true) {
         model.optimize();
 
@@ -80,7 +151,7 @@ inline void BP::column_gen(
         }
         
         SubProblem knps(n, duals, weight, capacity);
-        knps.solve(SOLVE_DP, env);
+        knps.solve(method, node, env);
 
         if (knps.objVal + EPS >= 0.0) {
             break;
@@ -98,4 +169,56 @@ inline void BP::column_gen(
             lmbda.push_back(model.addVar(0.0, GRB_INFINITY, 1.0, GRB_CONTINUOUS, col, vx.c_str()));
         }
     }
+
+    node.lb = model.get(GRB_DoubleAttr_ObjBound);
+    auto sol = most_fractional(model, lmbda, lmbd_itens, constrs, n_lmbda);
+    node.most_fract_val = sol.first;
+    node.most_fract = sol.second;
+
+    // reativando os padroes proibidos
+    for (auto &lmbd : frbd_lmbdas)
+        lmbd.set(GRB_DoubleAttr_UB, GRB_INFINITY);
+        
+}
+
+inline pair<double, Pair> BP::most_fractional(
+    GRBModel &model, 
+    vector<GRBVar> &lmbda,
+    vector<set<int>> &lmbd_itens, 
+    vector<GRBConstr> &constrs, 
+    int &n_lmbda
+) {
+    int old_sz = lmbd_itens.size();
+    lmbd_itens.resize(n_lmbda);
+
+    int numConstrs = (int) constrs.size();
+
+    for (int j = old_sz; j < n_lmbda; j++) {
+        for (int i = 0; i < numConstrs; i++) {
+            double coeff = model.getCoeff(constrs[i], lmbda[j]);
+            if (coeff > EPS)
+                lmbd_itens[j].emplace(i);
+        }
+    }
+
+    double mst_fract = 0.0;
+    Pair mst_fract_pair;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = i+1; j < n; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < n_lmbda; k++) {
+                if (!lmbd_itens[k].count(i) || !lmbd_itens[k].count(j)) continue;
+                sum += lmbda[k].get(GRB_DoubleAttr_X);
+            }
+            
+            double val = min(sum - floor(sum), ceil(sum) - sum);
+            if (val > mst_fract) {
+                mst_fract = val;
+                mst_fract_pair = make_pair(i,j);
+            }
+        }
+    }
+
+    return make_pair(mst_fract, mst_fract_pair);
 }

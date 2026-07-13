@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "combo.h"
+#include "node.h"
 #include "gurobi_c++.h"
 
 using namespace std;
@@ -19,10 +20,10 @@ struct SubProblem {
     double capacity, objVal;
     vector<int> solution;
 
-    SubProblem(int n_, vector<double> &p, vector<int> &w, double c); 
-    void solve(int method, GRBEnv* env);
+    SubProblem(int n_, vector<double> &p, vector<int> &w, double c);
+    void solve(int method, Node &node, GRBEnv* env);
     void solve_dp();
-    void solve_model(GRBEnv* env);
+    void solve_model(Node &node, GRBEnv* env);
 };
 
 #endif

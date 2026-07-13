@@ -85,24 +85,27 @@ void BP::branch(
         Node node = tree.back();
         tree.pop_back();
 
-        if (ceil(node.lb) >= ub) continue;
+        // ceil(node.lb) >= ub
+        if (node.lb + 1 >= ub) continue;
 
         if (node.is_feasible()) {
             ub = min(ub, node.lb);
         } else {
-            Node new_node = node;
+            Pair pair = node.most_fract;
 
-            new_node.reqrd_pairs.push_back(node.most_fract);
-            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
-            if (new_node.lb < ub)
-                tree.push_back(new_node);
+            node.reqrd_pairs.push_back(pair);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
+            // ceil(node.lb) < ub
+            if (node.lb + 1 < ub)
+                tree.push_back(node);
 
-            new_node.reqrd_pairs.pop_back();
+            node.reqrd_pairs.pop_back();
 
-            new_node.frbnd_pairs.push_back(node.most_fract);
-            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, new_node, SOLVE_MODEL);
-            if (new_node.lb < ub)
-                tree.push_back(new_node);
+            node.frbnd_pairs.push_back(pair);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
+            // ceil(node.lb) < ub
+            if (node.lb + 1 < ub)
+                tree.push_back(node);
         }
     }
 }

@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define TTL 30
+
 void BP::solve() {
     try {
         // Limpa o arquivo antes da execução
@@ -76,9 +78,11 @@ void BP::branch(
     for (int i = 0; i < n; i++)
         lmbd_itens[at(i,i)] = true;
 
+    std::vector<int> ttl(n, TTL); // 30 interacoes
+
     Node root;
     root.added_pair.resize(n * n);
-    column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, root, SOLVE_DP);
+    column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, root, ttl, SOLVE_DP);
     
     tree.push_back(root);
 
@@ -93,21 +97,22 @@ void BP::branch(
             ub = min(ub, node.lb);
         } else {
             Pair pair = node.most_fract;
+            if (pair == make_pair(0,0)) continue;
             
             node.added_pair[at(pair.first, pair.second)] = true;
 
             node.reqrd_pairs.push_back(pair);
-            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, ttl, SOLVE_MODEL);
             // ceil(node.lb) < ub
-            if (node.lb + 1 <= ub)
+            if (node.lb + 1 < ub)
                 tree.push_back(node);
 
             node.reqrd_pairs.pop_back();
 
             node.frbnd_pairs.push_back(pair);
-            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
+            column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, ttl, SOLVE_MODEL);
             // ceil(node.lb) < ub
-            if (node.lb + 1 <= ub)
+            if (node.lb + 1 < ub)
                 tree.push_back(node);
         }
     }
@@ -120,6 +125,7 @@ void BP::column_gen(
     vector<GRBConstr>& constrs, 
     int& n_lmbda,
     Node& node,
+    std::vector<int>& ttl,
     int method
 ) {
 
@@ -150,19 +156,25 @@ void BP::column_gen(
         }
     }
 
-    // bool infeasible = false;
+    bool infeasible = false;
 
     int prev_sz = n_lmbda;
+
+    int iter = 0;
+    int max_iter = 100;
+    double prev = 0.0;
 
     while (true) {
         model.optimize();
 
-        // if (model.get(GRB_IntAttr_Status) != GRB_OPTIMAL) {
-        //     infeasible = true;
-        //     break;
-        // }
+        if (model.get(GRB_IntAttr_Status) != GRB_OPTIMAL) {
+            infeasible = true;
+            break;
+        }
 
-        if (model.get(GRB_DoubleAttr_ObjBound) >= ub) break;
+        double lb = model.get(GRB_DoubleAttr_ObjBound);
+
+        if (lb + 1 >= ub) break;
 
         vector<double> duals(n);
         for (int i = 0; i < n; i++) {
@@ -190,26 +202,63 @@ void BP::column_gen(
             lmbda.push_back(model.addVar(0.0, GRB_INFINITY, 1.0, GRB_CONTINUOUS, col, vx.c_str()));
 
         }
+
+        iter++;
+        if (iter == max_iter) break;
+
+        if (abs(prev-lb) > EPS)
+            iter = 0;
+
+        prev = lb;
     }
 
     // reativando os padroes proibidos
     for (int j : idx_add)
         lmbda[j].set(GRB_DoubleAttr_UB, GRB_INFINITY);
 
-    // if (infeasible) {
-    //     node.lb = INF;
-    //     cout << "Error" << endl;
-    //     getchar();
-    //     return;
-    // }
+    if (infeasible) {
+        node.lb = INF;
+        cout << "Error" << endl;
+        getchar();
+        return;
+    }
 
     node.lb = model.get(GRB_DoubleAttr_ObjBound);
 
-    if (node.lb >= ub) return;
+    if (node.lb + 1 >= ub) return;
 
     node.lmbda_val.resize(n_lmbda);
     for (int j = 0; j < n_lmbda; j++)
         node.lmbda_val[j] = lmbda[j].get(GRB_DoubleAttr_X);
+
+    ttl.resize(n_lmbda);
+    for (int j = prev_sz; j < n_lmbda; j++)
+        ttl[j] = TTL;
+
+    int keep = n;
+    for (int j = n; j < n_lmbda; j++) {
+        if (node.lmbda_val[j] <= EPS)
+            ttl[j]--;
+        else
+            ttl[j] = TTL;
+
+        // col. vai ser deletada
+        if (ttl[j] == 0) {
+            model.remove(lmbda[j]);
+        }
+        else {
+            node.lmbda_val[keep] = node.lmbda_val[j];
+            lmbda[keep] = lmbda[j];
+            ttl[keep] = ttl[j];
+            keep++;
+        }
+    }
+
+    model.update();
+    node.lmbda_val.resize(keep);
+    lmbda.resize(keep);
+    ttl.resize(keep);
+    n_lmbda = keep;
 
     // int removed = 0;
     // for (int j = prev_sz; j < n_lmbda; j++) {
@@ -225,24 +274,10 @@ void BP::column_gen(
     // }
     
     // n_lmbda -= removed;
-    
-    most_fractional(model, lmbda, lmbd_itens, constrs, node, n_lmbda);
 
-    // cout << "UB: " << ub << endl;
-    // cout << "LB: " << node.lb << endl;
-    // cout << node.most_fract.first << ' ' << node.most_fract.second << endl;
-}
-
-void BP::most_fractional(
-    GRBModel& model, 
-    vector<GRBVar>& lmbda,
-    vector<bool>& lmbd_itens, 
-    vector<GRBConstr>& constrs, 
-    Node& node,
-    int& n_lmbda
-) {
-    // // Pega a ultima linha antes do resize
-    int old_sz = lmbd_itens.size() / n;
+    // Pega a ultima linha antes do resize
+    // int old_sz = lmbd_itens.size() / n;
+    int old_sz = n;
     lmbd_itens.resize(n_lmbda * n);
 
     for (int j = old_sz; j < n_lmbda; j++) {
@@ -258,7 +293,22 @@ void BP::most_fractional(
     //     }
 
     // }
+    
+    most_fractional(model, lmbda, lmbd_itens, constrs, node, n_lmbda);
 
+    cout << "LB: " << node.lb << endl;
+    cout << "UB: " << ub << endl;
+    cout << node.most_fract.first << ' ' << node.most_fract.second << endl;
+}
+
+void BP::most_fractional(
+    GRBModel& model, 
+    vector<GRBVar>& lmbda,
+    vector<bool>& lmbd_itens, 
+    vector<GRBConstr>& constrs, 
+    Node& node,
+    int& n_lmbda
+) {
     static vector<double> sum_pair(n*n);
     for (int i = 0; i < n; i++)
         for (int j = i + 1; j < n; j++)

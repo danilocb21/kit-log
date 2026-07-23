@@ -34,7 +34,7 @@ ifeq ($(BUILD),release)
 	CCLNFLAGS += -march=native -flto
     OBJDIR = obj/release
 else ifeq ($(BUILD),debug)
-    CFLAGS_MODE = -g -D _GLIBCXX_DEBUG -D _GLIBCXX_DEBUG_PEDANTIC
+    CFLAGS_MODE = -g3 -O0 -DDEBUG
     OBJDIR = obj/debug
 else
     $(error Invalid BUILD mode '$(BUILD)'. Use 'debug' or 'release')

@@ -13,6 +13,8 @@ struct Node {
     double most_fract_val;
     vector<Pair> frbnd_pairs;
     vector<Pair> reqrd_pairs;
+    vector<double> lmbda_val;
+    vector<bool> added_pair;
 
     bool is_feasible();
 };

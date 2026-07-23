@@ -54,7 +54,7 @@ void BP::solve() {
         std::chrono::duration<double> duration = end - start;
 
         print_results(model, duration.count(), instance.getInstanceName());
-        print_solution(model, lmbda, constrs);
+        //print_solution(model, lmbda, constrs);
         
     } catch (GRBException &e){
         cout << "Error code: " << e.getErrorCode() << endl;
@@ -67,16 +67,17 @@ void BP::solve() {
 }
 
 void BP::branch(
-    GRBModel &model,
-    vector<GRBVar> &lmbda,
-    vector<GRBConstr> &constrs,
-    int &n_lmbda
+    GRBModel& model,
+    vector<GRBVar>& lmbda,
+    vector<GRBConstr>& constrs,
+    int& n_lmbda
 ) {
     vector<bool> lmbd_itens(n * n);
     for (int i = 0; i < n; i++)
         lmbd_itens[at(i,i)] = true;
 
     Node root;
+    root.added_pair.resize(n * n);
     column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, root, SOLVE_DP);
     
     tree.push_back(root);
@@ -86,17 +87,19 @@ void BP::branch(
         tree.pop_back();
 
         // ceil(node.lb) >= ub
-        if (node.lb + 1 >= ub) continue;
+        if (node.lb + 1 > ub) continue;
 
         if (node.is_feasible()) {
             ub = min(ub, node.lb);
         } else {
             Pair pair = node.most_fract;
+            
+            node.added_pair[at(pair.first, pair.second)] = true;
 
             node.reqrd_pairs.push_back(pair);
             column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
             // ceil(node.lb) < ub
-            if (node.lb + 1 < ub)
+            if (node.lb + 1 <= ub)
                 tree.push_back(node);
 
             node.reqrd_pairs.pop_back();
@@ -104,19 +107,19 @@ void BP::branch(
             node.frbnd_pairs.push_back(pair);
             column_gen(model, lmbda, lmbd_itens, constrs, n_lmbda, node, SOLVE_MODEL);
             // ceil(node.lb) < ub
-            if (node.lb + 1 < ub)
+            if (node.lb + 1 <= ub)
                 tree.push_back(node);
         }
     }
 }
 
-inline void BP::column_gen(
-    GRBModel &model, 
-    vector<GRBVar> &lmbda,
-    vector<bool> &lmbd_itens,
-    vector<GRBConstr> &constrs, 
-    int &n_lmbda,
-    Node &node,
+void BP::column_gen(
+    GRBModel& model, 
+    vector<GRBVar>& lmbda,
+    vector<bool>& lmbd_itens,
+    vector<GRBConstr>& constrs, 
+    int& n_lmbda,
+    Node& node,
     int method
 ) {
 
@@ -147,8 +150,17 @@ inline void BP::column_gen(
         }
     }
 
+    // bool infeasible = false;
+
+    int prev_sz = n_lmbda;
+
     while (true) {
         model.optimize();
+
+        // if (model.get(GRB_IntAttr_Status) != GRB_OPTIMAL) {
+        //     infeasible = true;
+        //     break;
+        // }
 
         if (model.get(GRB_DoubleAttr_ObjBound) >= ub) break;
 
@@ -169,34 +181,67 @@ inline void BP::column_gen(
                 double xi = (double) knps.solution[i];
                 if (xi + EPS >= 1.0)
                     col.addTerm(xi, constrs[i]);
+                    
+                // lmbd_itens.push_back(xi + EPS >= 1.0);
             }
             
             string vx = "lmbda[" + to_string(n_lmbda) + "]";
             n_lmbda++;
             lmbda.push_back(model.addVar(0.0, GRB_INFINITY, 1.0, GRB_CONTINUOUS, col, vx.c_str()));
+
         }
     }
-
-    node.lb = model.get(GRB_DoubleAttr_ObjBound);
-    if (node.lb >= ub) return;
-    
-    auto sol = most_fractional(model, lmbda, lmbd_itens, constrs, n_lmbda);
-    node.most_fract_val = sol.first;
-    node.most_fract = sol.second;
 
     // reativando os padroes proibidos
     for (int j : idx_add)
         lmbda[j].set(GRB_DoubleAttr_UB, GRB_INFINITY);
+
+    // if (infeasible) {
+    //     node.lb = INF;
+    //     cout << "Error" << endl;
+    //     getchar();
+    //     return;
+    // }
+
+    node.lb = model.get(GRB_DoubleAttr_ObjBound);
+
+    if (node.lb >= ub) return;
+
+    node.lmbda_val.resize(n_lmbda);
+    for (int j = 0; j < n_lmbda; j++)
+        node.lmbda_val[j] = lmbda[j].get(GRB_DoubleAttr_X);
+
+    // int removed = 0;
+    // for (int j = prev_sz; j < n_lmbda; j++) {
+    //     node.lmbda_val[j - removed] = node.lmbda_val[j];
+
+    //     if (node.lmbda_val[j] <= EPS) {
+
+    //         model.remove(lmbda[j - removed]);
+    //         lmbda.erase(lmbda.begin() + j - removed);
+
+    //         removed++;
+    //     }
+    // }
+    
+    // n_lmbda -= removed;
+    
+    most_fractional(model, lmbda, lmbd_itens, constrs, node, n_lmbda);
+
+    // cout << "UB: " << ub << endl;
+    // cout << "LB: " << node.lb << endl;
+    // cout << node.most_fract.first << ' ' << node.most_fract.second << endl;
 }
 
-inline pair<double, Pair> BP::most_fractional(
-    GRBModel &model, 
-    vector<GRBVar> &lmbda,
-    vector<bool> &lmbd_itens, 
-    vector<GRBConstr> &constrs, 
-    int &n_lmbda
+void BP::most_fractional(
+    GRBModel& model, 
+    vector<GRBVar>& lmbda,
+    vector<bool>& lmbd_itens, 
+    vector<GRBConstr>& constrs, 
+    Node& node,
+    int& n_lmbda
 ) {
-    // Pega a ultima linha antes do resize
+    // // Pega a ultima linha antes do resize
     int old_sz = lmbd_itens.size() / n;
     lmbd_itens.resize(n_lmbda * n);
 
@@ -206,27 +251,46 @@ inline pair<double, Pair> BP::most_fractional(
             lmbd_itens[at(j,i)] = coeff > EPS;
         }
     }
+    // for (int j = 0; j < n_lmbda; j++) {
+    //     cout << "lmb" << j << "- " << node.lmbda_val[j] << ": ";
+    //     for (int i = 0; i < n; i++) {
+    //         cout << (lmbd_itens[at(j,i)] ? 1 : 0) << " \n"[i==n-1];
+    //     }
 
-    double mst_fract = 0.0;
-    Pair mst_fract_pair;
+    // }
 
-    for (int i = 0; i < n; i++) {
-        for (int j = i+1; j < n; j++) {
-            double sum = 0.0;
-            for (int k = 0; k < n_lmbda; k++) {
-                if (!lmbd_itens[at(k,i)] || !lmbd_itens[at(k,j)]) continue;
-                sum += lmbda[k].get(GRB_DoubleAttr_X);
-            }
-            
-            double val = min(sum - floor(sum), ceil(sum) - sum);
-            if (val > mst_fract) {
-                mst_fract = val;
-                mst_fract_pair = make_pair(i,j);
+    static vector<double> sum_pair(n*n);
+    for (int i = 0; i < n; i++)
+        for (int j = i + 1; j < n; j++)
+            sum_pair[at(i,j)] = 0.0;
+    
+    for (int k = 0; k < n_lmbda; k++) {
+        if (node.lmbda_val[k] <= EPS) continue;
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = i+1; j < n; j++) {
+                if (!node.added_pair[at(i,j)] && lmbd_itens[at(k,i)] && lmbd_itens[at(k,j)]) {
+                    sum_pair[at(i,j)] += node.lmbda_val[k];
+                }
             }
         }
     }
 
-    return make_pair(mst_fract, mst_fract_pair);
+    node.most_fract_val = 0.0;
+    node.most_fract = make_pair(0,0);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = i+1; j < n; j++) {
+                        
+            double sum = sum_pair[at(i,j)];
+            double val = min(sum - floor(sum), ceil(sum) - sum);
+
+            if (val > node.most_fract_val) {
+                node.most_fract_val = val;
+                node.most_fract = make_pair(i,j);
+            }
+        }
+    }
 }
 
 inline int BP::at(int i, int j) {

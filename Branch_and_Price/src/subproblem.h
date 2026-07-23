@@ -15,15 +15,15 @@ using namespace std;
 #define SOLVE_DP 1
 struct SubProblem {
     int n;
-    vector<double> price;
-    vector<int> weight;
+    vector<double>& price;
+    vector<int>& weight;
     double capacity, objVal;
     vector<int> solution;
 
-    SubProblem(int n_, vector<double> &p, vector<int> &w, double c);
-    void solve(int method, Node &node, GRBEnv* env);
+    SubProblem(int n_, vector<double>& p, vector<int>& w, double c);
+    void solve(int method, Node& node, GRBEnv* env);
     void solve_dp();
-    void solve_model(Node &node, GRBEnv* env);
+    void solve_model(Node& node, GRBEnv* env);
 };
 
 #endif

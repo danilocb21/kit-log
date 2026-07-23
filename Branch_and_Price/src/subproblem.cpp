@@ -5,13 +5,13 @@
 #include "node.h"
 #include "gurobi_c++.h"
 
-SubProblem::SubProblem(int n_, vector<double> &p, vector<int> &w, double c) 
+SubProblem::SubProblem(int n_, vector<double>& p, vector<int>& w, double c) 
     : n(n_), price(p), weight(w), capacity(c) {
     objVal = INF;
     solution.resize(n);
 }
 
-void SubProblem::solve(int method, Node &node, GRBEnv* env) {
+void SubProblem::solve(int method, Node& node, GRBEnv* env) {
     if (method == SOLVE_DP)
         solve_dp();
     else
@@ -45,7 +45,7 @@ void SubProblem::solve_dp() {
     }
 }
 
-void SubProblem::solve_model(Node &node, GRBEnv* env) {
+void SubProblem::solve_model(Node& node, GRBEnv* env) {
     GRBModel model = GRBModel(*env);
 
     model.set(GRB_StringAttr_ModelName, "Knapsack Problem");

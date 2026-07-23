@@ -6,13 +6,13 @@
 
 using namespace std;
 
-void BP::print_results(const GRBModel &model, double duration, const string &instanceName) {
+void BP::print_results(const GRBModel& model, double duration, const string& instanceName) {
     cout << "\n\nBranch-and-Price_Results: \n" << endl;
 
 	cout << "Instance: " << instanceName << endl;
     cout << "Total_Time: " << duration << endl;
-    cout << "Total_Memory_Used (MB): " << model.get(GRB_DoubleAttr_MaxMemUsed) * 1024 << endl;
-    cout << "LB: " << model.get(GRB_DoubleAttr_ObjBound) << endl;
+    // cout << "Total_Memory_Used (MB): " << model.get(GRB_DoubleAttr_MaxMemUsed) * 1024 << endl;
+    // cout << "LB: " << model.get(GRB_DoubleAttr_ObjBound) << endl;
     cout << "UB: " << ub << endl;
     cout << "Status: ";
     switch (model.get(GRB_IntAttr_Status)) {
@@ -39,7 +39,7 @@ void BP::print_results(const GRBModel &model, double duration, const string &ins
     cout << endl;
 }
 
-void BP::print_solution(GRBModel &model, const std::vector<GRBVar> &vars, const std::vector<GRBConstr> &constrs) {
+void BP::print_solution(GRBModel& model, const std::vector<GRBVar>& vars, const std::vector<GRBConstr>& constrs) {
     cout << "\nSolution:\n";
 
     int numVars = (int) vars.size();

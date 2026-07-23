@@ -1,6 +1,6 @@
 #include "BP.h"
 
-BP::BP(Data &data, double ub_) : instance(data), ub(ub_) {
+BP::BP(Data& data, double ub_) : instance(data), ub(ub_) {
     n = instance.getDimension();
     capacity = instance.getCapacity();
 

@@ -8,7 +8,7 @@
 #include "node.h"
 #include "gurobi_c++.h"
 
-#define EPS 3e-6
+#define EPS 9e-6
 
 class BP {
 private:
@@ -21,19 +21,19 @@ public:
     GRBEnv *env;
 
     double ub;
+    std::vector<double> solution;
 
     int n;
     double capacity;
     std::vector<int> weight;
 
     void solve();
-    void branch(GRBModel& model, std::vector<GRBVar>& lmbda, std::vector<GRBConstr>& constrs, int& n_lmbda);
-    void column_gen(GRBModel& model, std::vector<GRBVar>& lmbda, std::vector<bool>& lmbd_itens, std::vector<GRBConstr>& constrs, int& n_lmbda, Node& node, std::vector<int>& ttl, int method);
+    void branch(GRBModel& model, std::vector<GRBVar>& lmbda, std::vector<GRBConstr>& constrs, std::vector<bool>& lmbd_itens);
     void column_gen(GRBModel& model, std::vector<GRBVar>& lmbda, std::vector<bool>& lmbd_itens, std::vector<GRBConstr>& constrs, int& n_lmbda, Node& node, int method);
     void most_fractional(GRBModel& model, std::vector<GRBVar>& lmbda, std::vector<bool>& lmbd_itens, std::vector<GRBConstr>& constrs, Node& node, int& n_lmbda);
     inline int at(int i, int j);
     void print_results(const GRBModel& model, double duration, const std::string& instanceName);
-    void print_solution(GRBModel& model, const std::vector<GRBVar>& vars, const std::vector<GRBConstr>& constrs);
+    void print_solution(GRBModel& model, const std::vector<bool>& lmbd_itens);
 
     BP(Data& data, double ub_);
 };
